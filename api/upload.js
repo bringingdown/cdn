@@ -45,8 +45,12 @@ export default async function handler(req, res) {
             const data = await response.json();
 
             if (data.secure_url) {
-                const ext = data.format ? `.${data.format}` : '';
-                return res.status(200).json({ url: `/file/${data.public_id}${ext}` });
+                const format = data.format ? `.${data.format}` : '';
+                const publicId = data.public_id;
+                return res.status(200).json({ 
+                    url: `/file/${publicId}${format}`,
+                    full_url: `https://santana-cdn.web.id/file/${publicId}${format}`
+                });
             }
 
             return res.status(500).json({ error: JSON.stringify(data) });
