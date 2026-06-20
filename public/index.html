@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>santana cdn uploader</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .upload-box { background: #1e1e1e; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 90%; max-width: 400px; }
+        input[type="file"] { display: none; }
+        .btn { background: #0070f3; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block; margin-top: 15px; }
+        .result { margin-top: 20px; word-break: break-all; display: none; }
+        input[type="text"] { width: 100%; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="upload-box">
+    <h2>santana cdn uploader</h2>
+    <p>pilih foto/file buat dapet url custom domain lo</p>
+    <label for="file-upload" class="btn">pilih file</label>
+    <input id="file-upload" type="file" onchange="uploadFile()" />
+    
+    <div id="loading" style="display:none; margin-top:15px;">lagi nge-upload...</div>
+    
+    <div class="result" id="result-box">
+        <p>link cdn lo:</p>
+        <input type="text" id="cdn-url" readonly onclick="this.select(); document.execCommand('copy'); alert('link berhasil disalin!');">
+    </div>
+</div>
+
+<script>
+async function uploadFile() {
+    const fileInput = document.getElementById('file-upload');
+    const loading = document.getElementById('loading');
+    const resultBox = document.getElementById('result-box');
+    const cdnUrl = document.getElementById('cdn-url');
+    
+    if (!fileInput.files[0]) return;
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    
+    loading.style.display = 'block';
+    resultBox.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        
+        if (data.url) {
+            // otomatis ngubah domain hasil upload jadi domain lo sendiri
+            const currentDomain = window.location.origin;
+            cdnUrl.value = `${currentDomain}${data.url}`;
+            resultBox.style.display = 'block';
+        } else {
+            alert('gagal upload file');
+        }
+    } catch (err) {
+        alert('error: ' + err.message);
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+</script>
+</body>
+</html>
